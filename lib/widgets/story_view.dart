@@ -740,13 +740,13 @@ class PageBar extends StatefulWidget {
   final Color? indicatorForegroundColor;
 
   PageBar(
-    this.pages,
-    this.animation, {
-    this.indicatorHeight = IndicatorHeight.large,
-    this.indicatorColor,
-    this.indicatorForegroundColor,
-    Key? key,
-  }) : super(key: key);
+      this.pages,
+      this.animation, {
+        this.indicatorHeight = IndicatorHeight.large,
+        this.indicatorColor,
+        this.indicatorForegroundColor,
+        Key? key,
+      }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -783,24 +783,21 @@ class PageBarState extends State<PageBar> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: widget.pages.reversed.map((it) {
-        // Reverse the list of pages
-        return Expanded(
-          child: Container(
-            padding: EdgeInsets.only(right: widget.pages.last == it ? 0 : this.spacing),
-            child: StoryProgressIndicator(
-              isPlaying(it) ? widget.animation!.value : (it.shown ? 1 : 0),
-              indicatorHeight: widget.indicatorHeight == IndicatorHeight.large
-                  ? 5
-                  : widget.indicatorHeight == IndicatorHeight.medium
-                      ? 3
-                      : 2,
-              indicatorColor: widget.indicatorColor,
-              indicatorForegroundColor: widget.indicatorForegroundColor,
-            ),
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: widget.pages
+          .map((it) => Expanded(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: spacing / 2),
+          child: StoryProgressIndicator(
+            isPlaying(it) ? widget.animation!.value : (it.shown ? 1 : 0),
+            indicatorHeight: widget.indicatorHeight == IndicatorHeight.small ? 2 : 4,
+            indicatorColor: widget.indicatorColor,
+            indicatorForegroundColor: widget.indicatorForegroundColor,
           ),
-        );
-      }).toList(),
+        ),
+      ))
+          .toList()
+          .reversed.toList(), // Reverse the list to change the direction
     );
   }
 }
@@ -808,7 +805,6 @@ class PageBarState extends State<PageBar> {
 /// Custom progress bar. Supposed to be lighter than the
 /// original [ProgressIndicator], and rounded at the sides.
 class StoryProgressIndicator extends StatelessWidget {
-  /// From `0.0` to `1.0`, determines the progress of the indicator
   final double value;
   final double indicatorHeight;
   final Color? indicatorColor;
@@ -824,16 +820,17 @@ class StoryProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: Size.fromHeight(
-        this.indicatorHeight,
-      ),
-      foregroundPainter: IndicatorOval(
-        this.indicatorForegroundColor ?? Colors.white.withOpacity(0.8),
-        this.value,
-      ),
+      size: Size(double.infinity, indicatorHeight),
       painter: IndicatorOval(
-        this.indicatorColor ?? Colors.white.withOpacity(0.4),
-        1.0,
+        indicatorForegroundColor ?? Colors.white,
+        1 - value, // Subtract the value from 1 to reverse the direction
+      ),
+      child: Container(
+        height: indicatorHeight,
+        decoration: BoxDecoration(
+          color: indicatorColor ?? Colors.grey[800],
+          borderRadius: BorderRadius.circular(indicatorHeight / 2),
+        ),
       ),
     );
   }
